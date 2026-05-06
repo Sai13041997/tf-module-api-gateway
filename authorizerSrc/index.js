@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const JwksClient = require("jwks-rsa");
+const jwksClient = require("jwks-rsa");
 
 function policy(effect, principalId, resource, context) {
   return {
