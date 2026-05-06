@@ -2,11 +2,11 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  # Hardcoded CIDR allowlists - edit to your real values.
+  # Hardcoded CIDR allowlists — edit to your real values.
   ip_whitelist_production = [
     "184.72.69.228/32",
     "34.235.8.28/32",
-    "107.22.231.91/32",
+    "107.22.231.91/32"
   ]
 
   ip_whitelist_nonproduction = [
@@ -21,7 +21,7 @@ locals {
   selected_whitelist = var.is_production ? local.ip_whitelist_production : local.ip_whitelist_nonproduction
 
   # Use wildcard API id to avoid a cycle between the policy doc and the REST API resource.
-  execute_api_resource_wildcard = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*"
+  execute_api_resource_wildcard = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*/*"
 }
 
 data "aws_iam_policy_document" "rest_api_policy" {
