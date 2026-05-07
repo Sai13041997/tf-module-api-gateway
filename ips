@@ -1,0 +1,20 @@
+If your OLV Web Service uses IP address restrictions, the IP addresses for the KentuckyIVS production Web Services clients are:
+ 
+100.26.142.141
+13.219.186.27
+3.217.179.71
+34.198.158.154
+98.85.72.172
+3.232.189.110
+3.215.189.159
+3.208.235.10
+3.218.100.195
+18.210.237.224
+52.204.127.86
+3.82.166.48
+ 
+ 
+3.133.82.131 (DR- Disaster Recovery)
+ 
+The IP address of the test KentuckyIVS client is:
+3.217.110.156
