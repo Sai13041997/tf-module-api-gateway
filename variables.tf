@@ -36,3 +36,32 @@ EOT
     lambda_arn = string
   }))
 }
+
+# --------------------------------------------------
+# mTLS and Custom Domain Configuration
+# Used for SOAP API Gateway (Kentucky IVS integration)
+# --------------------------------------------------
+
+variable "mtls_enabled" {
+  type        = bool
+  description = "Enable mTLS for the API Gateway."
+  default     = false
+}
+
+variable "truststore_uri" {
+  type        = string
+  description = "S3 URI for the mTLS truststore PEM file."
+  default     = ""
+}
+
+variable "custom_domain_name" {
+  type        = string
+  description = "Custom domain name for the API Gateway."
+  default     = ""
+}
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "ACM certificate ARN for the custom domain."
+  default     = ""
+}
