@@ -20,6 +20,20 @@ locals {
 
   selected_whitelist = var.is_production ? local.ip_whitelist_production : local.ip_whitelist_nonproduction
 
+  # --------------------------------------------------
+  # SOAP API Gateway IP Whitelist
+  # Kentucky IVS client IP addresses
+  # --------------------------------------------------
+soap_ip_whitelist_production = [
+    "YOUR_PRODUCTION_IP/32",
+    "YOUR_DR_IP/32",
+  ]
+soap_ip_whitelist_nonproduction = [
+    "YOUR_TEST_IP/32",
+  ]
+
+  soap_selected_whitelist = var.is_production ? local.soap_ip_whitelist_production : local.soap_ip_whitelist_nonproduction
+
   # Use wildcard API id to avoid a cycle between the policy doc and the REST API resource.
   execute_api_resource_wildcard = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*/*"
 }
@@ -53,6 +67,39 @@ data "aws_iam_policy_document" "rest_api_policy" {
       identifiers = ["*"]
     }
 
+    actions   = ["execute-api:Invoke"]
+    resources = [local.execute_api_resource_wildcard]
+  }
+}
+
+# --------------------------------------------------
+# SOAP API Gateway Policy
+# Kentucky IVS IP whitelist
+# --------------------------------------------------
+data "aws_iam_policy_document" "soap_api_policy" {
+  statement {
+    sid    = "DenyNotWhitelisted"
+    effect = "Deny"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    actions   = ["execute-api:Invoke"]
+    resources = [local.execute_api_resource_wildcard]
+    condition {
+      test     = "NotIpAddress"
+      variable = "aws:SourceIp"
+      values   = local.soap_selected_whitelist
+    }
+  }
+
+  statement {
+    sid    = "AllowInvoke"
+    effect = "Allow"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
     actions   = ["execute-api:Invoke"]
     resources = [local.execute_api_resource_wildcard]
   }
