@@ -25,11 +25,25 @@ locals {
   # Kentucky IVS client IP addresses
   # --------------------------------------------------
 soap_ip_whitelist_production = [
-    "YOUR_PRODUCTION_IP/32",
-    "YOUR_DR_IP/32",
+    "100.26.142.141/32"
+    "13.219.186.27/32"
+    "3.217.179.71/32"
+    "34.198.158.154/32"
+    "98.85.72.172/32"
+    "3.232.189.110/32"
+    "3.215.189.159/32"
+    "3.208.235.10/32"
+    "3.218.100.195/32"
+    "18.210.237.224/32"
+    "52.204.127.86/32"
+    "3.82.166.48/32"
+  # --------------------------------------------------
+  # DDR- Disaster Recovery
+  # --------------------------------------------------
+   "3.133.82.131/32"
   ]
 soap_ip_whitelist_nonproduction = [
-    "YOUR_TEST_IP/32",
+    "3.217.110.156/32",
   ]
 
   soap_selected_whitelist = var.is_production ? local.soap_ip_whitelist_production : local.soap_ip_whitelist_nonproduction
