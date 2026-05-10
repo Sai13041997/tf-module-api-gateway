@@ -235,3 +235,25 @@ resource "aws_api_gateway_stage" "this" {
   deployment_id = aws_api_gateway_deployment.this.id
   stage_name    = var.stage_name
 }
+
+# --------------------------------------------------
+# mTLS Custom Domain Configuration
+# Used for SOAP API Gateway (Kentucky IVS integration)
+# --------------------------------------------------
+
+resource "aws_api_gateway_domain_name" "soap" {
+  count           = var.mtls_enabled ? 1 : 0
+  domain_name     = var.custom_domain_name
+  certificate_arn = var.acm_certificate_arn
+
+  mutual_tls_authentication {
+    truststore_uri = var.truststore_uri
+  }
+}
+
+resource "aws_api_gateway_base_path_mapping" "soap" {
+  count       = var.mtls_enabled ? 1 : 0
+  api_id      = aws_api_gateway_rest_api.this.id
+  stage_name  = aws_api_gateway_stage.this.stage_name
+  domain_name = aws_api_gateway_domain_name.soap[0].domain_name
+}
