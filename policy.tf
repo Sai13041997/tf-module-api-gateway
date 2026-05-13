@@ -17,36 +17,16 @@ locals {
     "54.145.132.232/32",
     "34.236.28.139/32",
   ]
-
-  selected_whitelist = var.is_production ? local.ip_whitelist_production : local.ip_whitelist_nonproduction
-
-  # --------------------------------------------------
-  # SOAP API Gateway IP Whitelist
-  # Kentucky IVS client IP addresses
-  # --------------------------------------------------
-soap_ip_whitelist_production = [
-    "100.26.142.141/32"
-    "13.219.186.27/32"
-    "3.217.179.71/32"
-    "34.198.158.154/32"
-    "98.85.72.172/32"
-    "3.232.189.110/32"
-    "3.215.189.159/32"
-    "3.208.235.10/32"
-    "3.218.100.195/32"
-    "18.210.237.224/32"
-    "52.204.127.86/32"
-    "3.82.166.48/32"
-  # --------------------------------------------------
-  # DDR- Disaster Recovery
-  # --------------------------------------------------
-   "3.133.82.131/32"
-  ]
-soap_ip_whitelist_nonproduction = [
-    "3.217.110.156/32",
-  ]
-
-  soap_selected_whitelist = var.is_production ? local.soap_ip_whitelist_production : local.soap_ip_whitelist_nonproduction
+  
+  # When custom_ip_whitelist is provided, use it exclusively for this API.
+  # When null (the default), fall back to the shared prod/non-prod lists.
+  # The existing api_gateway module call never passes custom_ip_whitelist
+  # so it always takes the right-hand branch — identical behaviour to before.
+  selected_whitelist = (
+    var.custom_ip_whitelist != null
+    ? var.custom_ip_whitelist
+    : (var.is_production ? local.ip_whitelist_production : local.ip_whitelist_nonproduction)
+  )
 
   # Use wildcard API id to avoid a cycle between the policy doc and the REST API resource.
   execute_api_resource_wildcard = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*/*"
@@ -81,39 +61,6 @@ data "aws_iam_policy_document" "rest_api_policy" {
       identifiers = ["*"]
     }
 
-    actions   = ["execute-api:Invoke"]
-    resources = [local.execute_api_resource_wildcard]
-  }
-}
-
-# --------------------------------------------------
-# SOAP API Gateway Policy
-# Kentucky IVS IP whitelist
-# --------------------------------------------------
-data "aws_iam_policy_document" "soap_api_policy" {
-  statement {
-    sid    = "DenyNotWhitelisted"
-    effect = "Deny"
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-    actions   = ["execute-api:Invoke"]
-    resources = [local.execute_api_resource_wildcard]
-    condition {
-      test     = "NotIpAddress"
-      variable = "aws:SourceIp"
-      values   = local.soap_selected_whitelist
-    }
-  }
-
-  statement {
-    sid    = "AllowInvoke"
-    effect = "Allow"
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
     actions   = ["execute-api:Invoke"]
     resources = [local.execute_api_resource_wildcard]
   }
