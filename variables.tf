@@ -37,31 +37,39 @@ EOT
   }))
 }
 
-# --------------------------------------------------
-# mTLS and Custom Domain Configuration
-# Used for SOAP API Gateway (Kentucky IVS integration)
-# --------------------------------------------------
-
-variable "mtls_enabled" {
-  type        = bool
-  description = "Enable mTLS for the API Gateway."
-  default     = false
+# ---------------------------------------------------------------------------
+# Optional — when set, this list is used instead of the shared prod/non-prod
+# lists, giving each API gateway its own independent IP allowlist.
+# The existing api_gateway call never passes this so it is completely
+# unaffected and keeps using ip_whitelist_nonproduction as before.
+# ---------------------------------------------------------------------------
+variable "custom_ip_whitelist" {
+  type        = list(string)
+  description = "Explicit CIDR allowlist for this API. Overrides the shared prod/non-prod lists when provided. Leave null to use the shared lists."
+  default     = null
 }
 
-variable "truststore_uri" {
+# ---------------------------------------------------------------------------
+# mTLS / custom domain — all three default to null so existing callers
+# (e.g. the existing api_gateway block pinned at v1.0.0) are completely
+# unaffected.  Set these only when you are ready to enable the custom domain
+# and mTLS.
+# ---------------------------------------------------------------------------
+
+variable "domain_name" {
   type        = string
-  description = "S3 URI for the mTLS truststore PEM file."
-  default     = ""
+  description = "Custom domain name for the API (e.g. soap-api.mvsolutions.com). Leave null to skip custom domain and mTLS setup."
+  default     = null
 }
 
-variable "custom_domain_name" {
+variable "regional_certificate_arn" {
   type        = string
-  description = "Custom domain name for the API Gateway."
-  default     = ""
+  description = "ACM certificate ARN for the custom domain (TLS). Required when domain_name is set."
+  default     = null
 }
 
-variable "acm_certificate_arn" {
+variable "mtls_truststore_uri" {
   type        = string
-  description = "ACM certificate ARN for the custom domain."
-  default     = ""
+  description = "S3 URI of the mTLS truststore PEM bundle (e.g. s3://my-bucket/truststore.pem). Required when domain_name is set and mTLS is needed."
+  default     = null
 }
