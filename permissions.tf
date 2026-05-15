@@ -1,8 +1,9 @@
 # Allow API Gateway to invoke the custom authorizer Lambda
 resource "aws_lambda_permission" "allow_apigw_invoke_authorizer" {
+  count       = var.domain_name != null ? 0 : 1
   statement_id  = "AllowAPIGatewayInvokeAuthorizer"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.jwt_authorizer.function_name
+  function_name = aws_lambda_function.jwt_authorizer[0].function_name
   principal     = "apigateway.amazonaws.com"
 
   # Any stage/any method for this REST API
