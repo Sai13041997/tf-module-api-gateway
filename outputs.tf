@@ -9,21 +9,12 @@ output "invoke_url" {
 }
 
 output "authorizer_lambda_arn" {
-  value       = aws_lambda_function.jwt_authorizer.arn
+  value       = try(aws_lambda_function.jwt_authorizer[0].arn, null)
   description = "ARN of the created Entra JWT authorizer Lambda (per API)."
 }
 
-# --------------------------------------------------
-# mTLS Custom Domain Outputs
-# Used for SOAP API Gateway (Kentucky IVS integration)
-# --------------------------------------------------
-
-output "soap_domain_name" {
-  description = "Custom domain name for the SOAP API Gateway."
-  value       = var.mtls_enabled ? aws_api_gateway_domain_name.soap[0].domain_name : ""
-}
-
-output "soap_cloudfront_domain_name" {
-  description = "CloudFront domain name for the SOAP API Gateway custom domain."
-  value       = var.mtls_enabled ? aws_api_gateway_domain_name.soap[0].cloudfront_domain_name : ""
+# Only populated once domain_name is set and the custom domain is created.
+output "custom_domain_target" {
+  value       = var.domain_name != null ? aws_api_gateway_domain_name.this[0].regional_domain_name : null
+  description = "Point your DNS CNAME to this value when the custom domain is active."
 }
