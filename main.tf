@@ -192,7 +192,7 @@ resource "aws_api_gateway_method" "this" {
   resource_id = local.resource_id_by_path[each.value.path]
   http_method = each.value.method
 
-  authorization = "CUSTOM"
+  authorization = var.domain_name != null ? "NONE" : "CUSTOM"
   authorizer_id = var.domain_name != null ? null : aws_api_gateway_authorizer.jwt[0].id
 }
 
@@ -252,6 +252,7 @@ resource "aws_api_gateway_domain_name" "this" {
   domain_name = var.domain_name
 
   regional_certificate_arn = var.regional_certificate_arn
+  security_policy = "TLS_1_2"
 
   endpoint_configuration {
     types = ["REGIONAL"]
@@ -262,8 +263,11 @@ resource "aws_api_gateway_domain_name" "this" {
   # requires a value — so we guard the whole domain resource on domain_name
   # being set, and expect the caller to also supply mtls_truststore_uri
   # at that point.
-  mutual_tls_authentication {
-    truststore_uri = var.mtls_truststore_uri
+  dynamic "mutual_tls_authentication" { 
+    for_each = var.mtls_truststore_uri != null ? [1] : [] 
+    content { 
+      truststore_uri = var.mtls_truststore_uri 
+    } 
   }
 }
 
