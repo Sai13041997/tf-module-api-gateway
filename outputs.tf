@@ -9,7 +9,7 @@ output "invoke_url" {
 }
 
 output "authorizer_lambda_arn" {
-  value       = try(aws_lambda_function.jwt_authorizer[0].arn, null)
+  value = var.domain_name != null ? null : aws_lambda_function.jwt_authorizer[0].arn
   description = "ARN of the created Entra JWT authorizer Lambda (per API)."
 }
 
